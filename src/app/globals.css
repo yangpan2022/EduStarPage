@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #1a1d4f;
+  --color-navy-2: #2a2b66;
+  --color-accent: #f9a71e;
+  --color-accent-bright: #fcb518;
+  --color-tertiary: #49518b;
+  --color-mist: #f9fafc;
+  --color-ink: #2a2b66;
+
+  --font-sans: var(--font-montserrat), "Segoe UI", system-ui, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+
+  --radius-card: 16px;
+  --radius-pill: 50px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  body {
+    background: #ffffff;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-navy);
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: #fcb518;
+    color: #000000;
+  }
+}
+
+@utility header-gradient {
+  background-image: linear-gradient(91deg, #1a1d4f 0%, #506e9a 100%);
+}
+
+@utility footer-gradient {
+  background-image: linear-gradient(235deg, #1a1d4f 0%, #506e9a 100%);
+}
+
+@utility hero-gradient {
+  background-image: linear-gradient(135deg, #1a1d4f 0%, #49518b 100%);
+}
+
+@utility section-pad {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+@utility container-x {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+/* Entrance reveal (matches Elementor fadeIn / slideInUp) */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.reveal[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Shine sweep used by the Free Trial buttons */
+@keyframes shine {
+  0% {
+    left: -75%;
+  }
+  100% {
+    left: 125%;
+  }
+}
+
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shine::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+
+.btn-shine:hover::before {
+  animation: shine 0.8s ease-out;
+}
+
+/* Accent underline used by section headings */
+.heading-underline {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 1rem;
+}
+
+.heading-underline::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+}
+
+.heading-underline-left::after {
+  left: 0;
+  transform: none;
+}
