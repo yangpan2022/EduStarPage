@@ -1,6 +1,6 @@
 # EduStar Academic Centre — Website
 
-A 1:1 rebuild of the EduStar Academic Centre website (originally WordPress + Astra + Elementor), rebuilt with modern tooling. Content, colours, fonts and imagery are carried over from the source site; layout and alignment issues from the original have been cleaned up.
+A Web rebuild of the EduStar Academic Centre website (originally WordPress + Astra + Elementor), rebuilt with modern tooling. Content, colours, fonts and imagery are carried over from the source site; layout and alignment issues from the original have been cleaned up.
 
 ## Version
 
