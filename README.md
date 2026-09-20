@@ -4,13 +4,29 @@ A Web rebuild of the EduStar Academic Centre website (originally WordPress + Ast
 
 ## Version
 
-**v0.1.0** — initial build (2026-09-20)
+**v0.1.1** — bilingual release (2026-09-20)
+
+### Changelog
+
+- **v0.1.1**
+  - Added site-wide **English / 中文** switching via a single toggle in the top-right
+    (preference persisted in `localStorage`); all pages translated.
+  - International School fees/features sections and the comparison table are now bilingual.
+  - University Quiz now follows the global language toggle.
+  - Home: moved the "15+ Teaching Experts" stat into the stats row and removed the
+    floating overlay.
+  - Header: single-line nav on desktop, "Book Trial" always visible, hours label cleaned up.
+  - Contact/home: trial form and address panel are now equal height (bottom-aligned).
+  - Configured static export (`output: "export"`) for Cloudflare Pages; added `serve:lan`
+    / `preview` scripts for LAN preview.
+- **v0.1.0** — initial build (2026-09-20): all marketing pages, quiz, forms, assets.
 
 ### Current status
 
 - ✅ All marketing pages implemented: Home, About Us, Testimonial, Meet Our Team,
   Services + 4 service sub-pages, Resources, Competitions, University Test,
   Singapore International School comparison, Contact.
+- ✅ Full **English / 中文** bilingual support across every page, toggled from the header.
 - ✅ Global chrome: top bar, responsive nav (single-line on desktop, drawer on mobile),
   footer, back-to-top, scroll reveal and counter animations.
 - ✅ University Readiness Quiz — full 5-step quiz ported from the source site,

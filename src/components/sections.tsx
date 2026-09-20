@@ -34,8 +34,8 @@ export function PageBanner({
   intro,
   children,
 }: {
-  kicker?: string;
-  title: string;
+  kicker?: ReactNode;
+  title: ReactNode;
   intro?: ReactNode;
   children?: ReactNode;
 }) {
@@ -76,7 +76,7 @@ export function CtaSection({
 }: {
   title: ReactNode;
   description: ReactNode;
-  buttonLabel: string;
+  buttonLabel: ReactNode;
   buttonHref: string;
   buttonIcon?: ReactNode;
 }) {
@@ -114,10 +114,10 @@ export function ServiceCard({
   linkLabel = "Learn More",
 }: {
   icon: ReactNode;
-  title: string;
-  description: string;
+  title: ReactNode;
+  description: ReactNode;
   href?: string;
-  linkLabel?: string;
+  linkLabel?: ReactNode;
 }) {
   return (
     <article className="group flex h-full flex-col rounded-[18px] border-t-4 border-accent bg-white p-8 shadow-[0_10px_30px_rgba(26,29,79,0.07)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_45px_rgba(26,29,79,0.14)]">
@@ -142,8 +142,8 @@ export function StatBanner({
   title,
   stats,
 }: {
-  title?: string;
-  stats: { value: string; label: string }[];
+  title?: ReactNode;
+  stats: { value: ReactNode; label: ReactNode }[];
 }) {
   return (
     <section className="container-x pb-16 sm:pb-20">
@@ -154,8 +154,8 @@ export function StatBanner({
           </h2>
         )}
         <dl className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
+          {stats.map((stat, index) => (
+            <div key={index} className="text-center">
               <dt className="sr-only">{stat.label}</dt>
               <dd>
                 <span className="block text-4xl font-extrabold text-accent sm:text-5xl">
@@ -176,9 +176,9 @@ export function TestimonialCard({
   name,
   meta,
 }: {
-  quote: string;
-  name: string;
-  meta: string;
+  quote: ReactNode;
+  name: ReactNode;
+  meta: ReactNode;
 }) {
   return (
     <figure className="flex h-full flex-col rounded-[18px] bg-white p-7 shadow-[0_10px_30px_rgba(26,29,79,0.08)]">

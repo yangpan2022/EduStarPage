@@ -1,11 +1,13 @@
 {
   "name": "edustarpage",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "preview": "next build && python3 -m http.server 3000 --directory out --bind 0.0.0.0",
+    "serve:lan": "python3 -m http.server 3000 --directory out --bind 0.0.0.0",
     "lint": "eslint"
   },
   "dependencies": {

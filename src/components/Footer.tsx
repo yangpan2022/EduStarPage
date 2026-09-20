@@ -7,13 +7,14 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 import { site } from "@/lib/site";
+import { T } from "@/components/T";
 
 const footerLinks = [
-  { label: "About Us", href: "/about-us" },
-  { label: "Meet Our Team", href: "/meet-our-team" },
-  { label: "Services", href: "/services" },
-  { label: "Testimonial", href: "/testimonial" },
-  { label: "Contact", href: "/contact" },
+  { label: "About Us", labelZh: "关于我们", href: "/about-us" },
+  { label: "Meet Our Team", labelZh: "师资团队", href: "/meet-our-team" },
+  { label: "Services", labelZh: "服务项目", href: "/services" },
+  { label: "Testimonial", labelZh: "学员评价", href: "/testimonial" },
+  { label: "Contact", labelZh: "联系我们", href: "/contact" },
 ];
 
 const socials = [
@@ -37,12 +38,14 @@ export default function Footer() {
               className="mb-5 h-auto w-[200px]"
             />
             <p className="max-w-sm text-[15px] leading-relaxed text-white/85">
-              {site.tagline}
+              <T en={site.tagline} zh={site.taglineZh} />
             </p>
           </div>
 
           <nav aria-label="Footer">
-            <h3 className="mb-5 text-lg font-semibold text-white">Quick Links</h3>
+            <h3 className="mb-5 text-lg font-semibold text-white">
+              <T en="Quick Links" zh="快速链接" />
+            </h3>
             <ul className="flex flex-col gap-3">
               {footerLinks.map((link) => (
                 <li key={link.label}>
@@ -50,7 +53,7 @@ export default function Footer() {
                     href={link.href}
                     className="text-[15px] text-white/85 transition-colors hover:text-accent"
                   >
-                    {link.label}
+                    <T en={link.label} zh={link.labelZh} />
                   </Link>
                 </li>
               ))}
@@ -58,12 +61,14 @@ export default function Footer() {
           </nav>
 
           <div>
-            <h3 className="mb-5 text-lg font-semibold text-white">Stay Connected</h3>
+            <h3 className="mb-5 text-lg font-semibold text-white">
+              <T en="Stay Connected" zh="关注我们" />
+            </h3>
             <Link
               href="/contact"
               className="btn-shine mb-6 inline-flex w-fit whitespace-nowrap rounded-pill bg-gradient-to-br from-accent to-accent-bright px-7 py-3 text-base font-bold text-white shadow-[0_6px_20px_rgba(249,167,30,0.4)] transition-transform hover:-translate-y-0.5"
             >
-              Ask Us ...
+              <T en="Ask Us ..." zh="联系我们" />
             </Link>
             <ul className="flex flex-wrap gap-x-5 gap-y-3">
               {socials.map(({ label, href, Icon }) => (
@@ -86,7 +91,7 @@ export default function Footer() {
 
       <div className="bg-navy py-4 text-center">
         <p className="text-sm text-accent-bright">
-          Copyright © 2026 | Powered by{" "}
+          <T en="Copyright © 2026 | Powered by " zh="版权所有 © 2026 | 技术支持 " />
           <a
             href="https://wpastra.com"
             target="_blank"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useLang } from "@/components/LanguageProvider";
 
 type School = {
   name: string;
@@ -29,16 +30,25 @@ const schools: School[] = [
   { name: "Hwa Chong International", site: "hcis.edu.sg", pathway: "IB Continuum", location: "Bukit Timah Rd", founded: "2005", primary: "No Primary tier", secondary: "$34,880–39,240", total: "$42,129–46,707" },
 ];
 
+const pathwayZh: Record<string, string> = {
+  "IB Continuum": "IB 一贯制",
+  "American / AP": "美式 / AP",
+  "British + IB": "英式 + IB",
+  "Multi-Diploma": "多文凭",
+  "Australian + IB": "澳式 + IB",
+};
+
 const filters = [
-  "All Schools",
-  "IB Continuum",
-  "British + IB",
-  "American / AP",
-  "Australian + IB",
-  "Multi-Diploma",
+  { value: "All Schools", en: "All Schools", zh: "全部学校" },
+  { value: "IB Continuum", en: "IB Continuum", zh: "IB 一贯制" },
+  { value: "British + IB", en: "British + IB", zh: "英式 + IB" },
+  { value: "American / AP", en: "American / AP", zh: "美式 / AP" },
+  { value: "Australian + IB", en: "Australian + IB", zh: "澳式 + IB" },
+  { value: "Multi-Diploma", en: "Multi-Diploma", zh: "多文凭" },
 ];
 
 export default function SchoolComparison() {
+  const { lang, t } = useLang();
   const [active, setActive] = useState("All Schools");
 
   const rows = useMemo(
@@ -46,22 +56,34 @@ export default function SchoolComparison() {
     [active],
   );
 
+  const headers = [
+    t("School", "学校"),
+    t("Pathway", "课程路径"),
+    t("Location", "位置"),
+    t("Founded", "创办年份"),
+    t("Primary Tuition", "小学学费"),
+    t("Secondary Tuition", "中学学费"),
+    t("Est. 1st-Yr Total", "首年预估总额"),
+  ];
+
   return (
     <div>
-      <p className="mb-4 text-sm font-semibold text-navy">Tap a pathway to filter the table:</p>
+      <p className="mb-4 text-sm font-semibold text-navy">
+        {t("Tap a pathway to filter the table:", "点击课程路径筛选表格：")}
+      </p>
       <div className="mb-6 flex flex-wrap gap-2.5">
         {filters.map((filter) => (
           <button
-            key={filter}
+            key={filter.value}
             type="button"
-            onClick={() => setActive(filter)}
+            onClick={() => setActive(filter.value)}
             className={`rounded-pill border px-4 py-2 text-sm font-semibold transition ${
-              active === filter
+              active === filter.value
                 ? "border-accent bg-accent text-navy"
                 : "border-black/10 bg-white text-navy-2 hover:border-accent hover:text-accent"
             }`}
           >
-            {filter}
+            {t(filter.en, filter.zh)}
           </button>
         ))}
       </div>
@@ -70,29 +92,28 @@ export default function SchoolComparison() {
         <table className="w-full min-w-[900px] border-collapse bg-white text-left text-sm">
           <thead>
             <tr className="bg-navy text-white">
-              {["School", "Pathway", "Location", "Founded", "Primary Tuition", "Secondary Tuition", "Est. 1st-Yr Total"].map(
-                (heading) => (
-                  <th key={heading} className="px-4 py-4 font-semibold">
-                    {heading}
-                  </th>
-                ),
-              )}
+              {headers.map((heading) => (
+                <th key={heading} className="px-4 py-4 font-semibold">
+                  {heading}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {rows.map((school, index) => (
-              <tr
-                key={school.name}
-                className={index % 2 === 0 ? "bg-white" : "bg-mist"}
-              >
+              <tr key={school.name} className={index % 2 === 0 ? "bg-white" : "bg-mist"}>
                 <td className="px-4 py-4 align-top">
                   <span className="font-semibold text-navy">{school.name}</span>
                   <span className="mt-0.5 block text-xs text-tertiary">{school.site}</span>
                 </td>
-                <td className="px-4 py-4 align-top text-navy-2">{school.pathway}</td>
+                <td className="px-4 py-4 align-top text-navy-2">
+                  {lang === "zh" ? pathwayZh[school.pathway] ?? school.pathway : school.pathway}
+                </td>
                 <td className="px-4 py-4 align-top text-navy-2">{school.location}</td>
                 <td className="px-4 py-4 align-top text-navy-2">{school.founded}</td>
-                <td className="px-4 py-4 align-top text-navy-2">{school.primary}</td>
+                <td className="px-4 py-4 align-top text-navy-2">
+                  {school.primary === "No Primary tier" && lang === "zh" ? "无小学部" : school.primary}
+                </td>
                 <td className="px-4 py-4 align-top text-navy-2">{school.secondary}</td>
                 <td className="px-4 py-4 align-top font-semibold text-accent">{school.total}</td>
               </tr>

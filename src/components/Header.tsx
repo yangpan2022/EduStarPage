@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   FaBars,
   FaChevronDown,
@@ -14,6 +14,8 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import { nav, site, type NavItem } from "@/lib/site";
+import { useLang } from "@/components/LanguageProvider";
+import LangToggle from "@/components/LangToggle";
 
 function isActive(pathname: string, item: NavItem): boolean {
   if (pathname === item.href) return true;
@@ -23,8 +25,21 @@ function isActive(pathname: string, item: NavItem): boolean {
 
 export default function Header() {
   const pathname = usePathname();
+  const { lang, t } = useLang();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const localizedNav = useMemo(
+    () =>
+      nav.map(function localize(item): NavItem {
+        return {
+          ...item,
+          label: lang === "zh" ? item.labelZh : item.label,
+          children: item.children?.map(localize),
+        };
+      }),
+    [lang],
+  );
 
   return (
     <header className="relative z-50 bg-white">
@@ -54,6 +69,9 @@ export default function Header() {
             <FaInstagram className="h-3.5 w-3.5" aria-hidden />
             <span>@edustar_sg</span>
           </a>
+          <div className="ml-auto">
+            <LangToggle />
+          </div>
         </div>
       </div>
 
@@ -74,7 +92,7 @@ export default function Header() {
           {/* Desktop nav */}
           <nav className="hidden min-w-0 flex-1 lg:block" aria-label="Main">
             <ul className="flex items-center justify-center gap-1 xl:gap-1.5">
-              {nav.map((item) => {
+              {localizedNav.map((item) => {
                 const active = isActive(pathname, item);
                 return (
                   <li key={item.label} className="group relative">
@@ -138,15 +156,17 @@ export default function Header() {
           <div className="flex shrink-0 items-center gap-3 sm:gap-5">
             <div className="hidden flex-col items-end leading-tight xl:flex">
               <span className="text-xs font-medium uppercase tracking-wide text-tertiary">
-                Opening Hours
+                {t("Opening Hours", "营业时间")}
               </span>
-              <span className="text-sm font-semibold text-navy">{site.hours}</span>
+              <span className="text-sm font-semibold text-navy">
+                {t(site.hours, site.hoursZh)}
+              </span>
             </div>
             <Link
               href="/contact"
               className="btn-shine inline-flex shrink-0 whitespace-nowrap rounded-pill bg-gradient-to-br from-accent to-accent-bright px-3 py-2 text-xs font-bold text-white shadow-[0_6px_20px_rgba(249,167,30,0.4)] transition-transform duration-200 hover:-translate-y-0.5 sm:px-5 sm:py-2.5 sm:text-sm lg:px-6 lg:py-3 lg:text-base"
             >
-              Book Trial
+              {t("Book Trial", "预约试听")}
             </Link>
             <button
               type="button"
@@ -169,7 +189,7 @@ export default function Header() {
       >
         <nav className="container-x py-4" aria-label="Mobile">
           <ul className="flex flex-col divide-y divide-black/5">
-            {nav.map((item, index) => {
+            {localizedNav.map((item, index) => {
               const expanded = openIndex === index;
               return (
                 <li key={item.label} className="py-1">
@@ -237,7 +257,7 @@ export default function Header() {
             onClick={() => setMobileOpen(false)}
             className="mt-4 block whitespace-nowrap rounded-pill bg-gradient-to-br from-accent to-accent-bright px-6 py-3 text-center text-base font-bold text-white"
           >
-            Book Trial
+            {t("Book Trial", "预约试听")}
           </Link>
         </nav>
       </div>

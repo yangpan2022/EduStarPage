@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import { useLang } from "@/components/LanguageProvider";
 
 type Lang = "en" | "zh";
 type Curric = "IB" | "AL" | "IGCSE" | "OTHER";
@@ -334,7 +335,7 @@ function getCountryRecs(dest: Dest, tier: Tier, lang: Lang, cca: Cca | null): Re
 }
 
 export default function UniversityQuiz() {
-  const [lang, setLang] = useState<Lang>("en");
+  const { lang, setLang } = useLang();
   const [step, setStep] = useState(1);
   const [showResult, setShowResult] = useState(false);
   const [grade, setGrade] = useState<number | null>(null);

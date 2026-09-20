@@ -75,6 +75,15 @@
   padding-inline: 1.5rem;
 }
 
+/* Language switching: elements tagged with data-lang are shown per <html data-lang> */
+html[data-lang="zh"] [data-lang="en"] {
+  display: none !important;
+}
+
+html:not([data-lang="zh"]) [data-lang="zh"] {
+  display: none !important;
+}
+
 /* Entrance reveal (matches Elementor fadeIn / slideInUp) */
 .reveal {
   opacity: 0;
