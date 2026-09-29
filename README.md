@@ -4,11 +4,19 @@ A Web rebuild of the EduStar Academic Centre website (originally WordPress + Ast
 
 ## Version
 
-**v0.1.1** — bilingual release (2026-09-20)
+**v1.0.0** — production release (2026-09-29)
 
 ### Changelog
 
-- **v0.1.1**
+- **v1.0.0**
+  - Deployed to Hostinger shared hosting at `edustarcorp.com` via GitHub Actions
+    (build + FTP deploy to `public_html`).
+  - Wired the free-trial form to Formspree (`NEXT_PUBLIC_FORMSPREE_ENDPOINT` is injected
+    at build time from a GitHub secret), so booking requests are emailed instead of
+    opening the visitor's mail client.
+  - Removed the inline `data-lang` script from `layout.tsx` that caused a React
+    hydration mismatch; language attribute is now set exclusively by `LanguageProvider`.
+- **v0.1.1** — bilingual release (2026-09-20)
   - Added site-wide **English / 中文** switching via a single toggle in the top-right
     (preference persisted in `localStorage`); all pages translated.
   - International School fees/features sections and the comparison table are now bilingual.
@@ -36,8 +44,8 @@ A Web rebuild of the EduStar Academic Centre website (originally WordPress + Ast
 - ⏳ Placeholder pages ("Coming Soon"): Questionbank (parent + Primary/Secondary/IB),
   Dashboard, Student Registration, Instructor Registration — the source site has no
   published content for these either.
-- ⏳ The free-trial form needs `NEXT_PUBLIC_FORMSPREE_ENDPOINT`; without it, it falls
-  back to opening the visitor's mail client.
+- ✅ The free-trial form posts to Formspree (endpoint injected at build time), emailing
+  booking requests to the centre.
 - 🖼 Team photos and testimonial avatars currently reuse the source site's placeholder images.
 
 ## Tech stack
@@ -92,8 +100,32 @@ NEXT_PUBLIC_FORMSPREE_ENDPOINT="https://formspree.io/f/your-id"
 ```
 
 If the variable is not set, the form falls back to opening the visitor's mail client.
+In production this value is stored as the GitHub secret `FORMSPREE_ENDPOINT` and injected
+into the build by the deploy workflow.
 
-## Deploy to Cloudflare Pages
+## Deploy to Hostinger (GitHub Actions)
+
+The site is deployed automatically to Hostinger shared hosting on every push to `main` via
+`.github/workflows/deploy.yml`:
+
+1. GitHub Actions checks out the repo, installs dependencies, and runs `npm run build`
+   with `NEXT_PUBLIC_FORMSPREE_ENDPOINT` injected from the `FORMSPREE_ENDPOINT` secret.
+2. The static `out/` directory is uploaded over FTP to `public_html` on the Hostinger server.
+
+Required GitHub Actions secrets:
+
+| Secret | Description |
+| ------ | ----------- |
+| `FTP_HOST` | Hostinger FTP server IP |
+| `FTP_USERNAME` | FTP account username |
+| `FTP_PASSWORD` | FTP account password |
+| `FTP_PORT` | FTP port (usually `21`) |
+| `FORMSPREE_ENDPOINT` | Formspree form endpoint (e.g. `https://formspree.io/f/xxxx`) |
+
+> Note: the FTP account's home directory is `public_html`, so the workflow deploys to
+> `server-dir: ./` (not `./public_html/`).
+
+## Deploy to Cloudflare Pages (alternative)
 
 1. Push this repository to GitHub/GitLab.
 2. In the Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git**.
