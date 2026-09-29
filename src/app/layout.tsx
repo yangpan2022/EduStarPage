@@ -30,12 +30,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${montserrat.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-white">
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "(function(){try{var l=localStorage.getItem('lang');document.documentElement.setAttribute('data-lang',l==='zh'?'zh':'en');}catch(e){document.documentElement.setAttribute('data-lang','en');}})();",
-          }}
-        />
         <LanguageProvider>
           <Header />
           <main className="flex-1">{children}</main>
