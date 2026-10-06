@@ -25,6 +25,36 @@ jobs:
         env:
           NEXT_PUBLIC_FORMSPREE_ENDPOINT: ${{ secrets.FORMSPREE_ENDPOINT }}
 
+      # A deploy that gets killed mid-transfer leaves the action's ".in.<name>"
+      # staging file behind on the server, and every later run then dies with
+      #   FTPError: 550 ... Temporary hidden file ... already exists
+      # Remove any such leftovers before syncing. Never fail the job here.
+      - name: Clean up leftover FTP staging files
+        continue-on-error: true
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          set +e
+          commands=()
+          while IFS= read -r f; do
+            dir=$(dirname "$f")
+            [ "$dir" = "." ] && dir=""
+            commands+=(-Q "*DELE /${dir}/.in.$(basename "$f")")
+          done < <(cd out && find . -type f -printf '%P\n')
+          echo "staging paths checked: $(( ${#commands[@]} / 2 ))"
+
+          curl -sS -v -u "$FTP_USERNAME:$FTP_PASSWORD" \
+            "ftp://$FTP_HOST:$FTP_PORT/" "${commands[@]}" \
+            -o /dev/null > "$RUNNER_TEMP/ftp-cleanup.log" 2>&1
+
+          echo "DELE sent     : $(grep -c '^> DELE' "$RUNNER_TEMP/ftp-cleanup.log")"
+          echo "DELE succeeded: $(grep -c '^< 250' "$RUNNER_TEMP/ftp-cleanup.log")"
+          echo "unexpected replies:"
+          grep -E '^< [45][0-9][0-9] ' "$RUNNER_TEMP/ftp-cleanup.log" | grep -v '^< 550 ' | head -5
+
       - name: Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
