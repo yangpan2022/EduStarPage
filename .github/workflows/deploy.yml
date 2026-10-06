@@ -25,10 +25,11 @@ jobs:
         env:
           NEXT_PUBLIC_FORMSPREE_ENDPOINT: ${{ secrets.FORMSPREE_ENDPOINT }}
 
-      # A deploy that gets killed mid-transfer leaves the action's ".in.<name>"
-      # staging file behind on the server, and every later run then dies with
+      # A deploy that gets killed mid-transfer leaves a hidden staging file
+      # behind (the FTP client uploads to ".in.<name>." and then renames), and
+      # every later run then dies with
       #   FTPError: 550 ... Temporary hidden file ... already exists
-      # Remove any such leftovers before syncing. Never fail the job here.
+      # Sweep every directory for such leftovers before syncing. Never fail here.
       - name: Clean up leftover FTP staging files
         continue-on-error: true
         env:
@@ -38,30 +39,25 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           set +e
-          URL="ftp://$FTP_HOST:$FTP_PORT"
-          TARGET="_not-found/.in.__next._index.txt"
-          probe() {
-            echo "----- $1"
-            shift
-            curl -sS -v -u "$FTP_USERNAME:$FTP_PASSWORD" "$URL/" "$@" -o /dev/null 2>&1 \
-              | grep -E '^[<>] (PWD|DELE|CWD|550|250|257|530)' | head -12
-          }
+          url="ftp://$FTP_HOST:$FTP_PORT"
+          dirs=()
+          while IFS= read -r d; do dirs+=("$d"); done < <(cd out && find . -type d -printf '%P\n')
+          echo "scanning ${#dirs[@]} directories"
 
-          echo "===== login directory"
-          probe "PWD" -Q "PWD"
-          echo "===== listing /"
-          curl -sS -u "$FTP_USERNAME:$FTP_PASSWORD" "$URL/" 2>&1 | head -20
-          echo "===== listing /_not-found/"
-          curl -sS -u "$FTP_USERNAME:$FTP_PASSWORD" "$URL/_not-found/" 2>&1 | head -20
-
-          echo "===== delete attempts"
-          probe "absolute path"     -Q "*DELE /$TARGET"
-          probe "relative path"     -Q "*DELE $TARGET"
-          probe "cwd + basename"    -Q "CWD /_not-found" -Q "*DELE .in.__next._index.txt" -Q "CWD /"
-          probe "full server path"  -Q "*DELE /domains/edustarcorp.com/public_html/$TARGET"
-
-          echo "===== leftovers still present in /_not-found/"
-          curl -sS -u "$FTP_USERNAME:$FTP_PASSWORD" "$URL/_not-found/" 2>&1 | grep -F '.in.' || echo "(none)"
+          found=0
+          for d in "${dirs[@]}"; do
+            path="$url/"
+            [ -n "$d" ] && path="$url/$d/"
+            listing=$(curl -sS -u "$FTP_USERNAME:$FTP_PASSWORD" "$path" 2>/dev/null)
+            while IFS= read -r name; do
+              [ -z "$name" ] && continue
+              found=$((found + 1))
+              echo "removing leftover: /$d/$name"
+              curl -sS -u "$FTP_USERNAME:$FTP_PASSWORD" "$url/" \
+                -Q "DELE /$d/$name" -o /dev/null 2>&1 | grep -E '^< ' | head -2
+            done < <(printf '%s\n' "$listing" | awk '$NF ~ /^\.in\./ { print $NF }')
+          done
+          echo "leftovers removed: $found"
 
       - name: Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
