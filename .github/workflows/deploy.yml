@@ -34,3 +34,7 @@ jobs:
           port: ${{ secrets.FTP_PORT }}
           local-dir: ./out/
           server-dir: ./
+          # Default is 30000 ms. Hostinger's FTP control socket goes idle while a
+          # larger file transfers, which killed the deploy with
+          # "Error: Timeout (control socket)". Give each operation real headroom.
+          timeout: 300000
