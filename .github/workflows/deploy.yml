@@ -45,6 +45,14 @@ jobs:
         run: |
           set +e
           url="ftp://$FTP_HOST:$FTP_PORT"
+          # Send one DELE and echo the server's reply (250 = removed).
+          # curl -v is required, otherwise the reply never reaches the log, and
+          # the filter has to skip the LIST chatter (150/226) that follows it.
+          dele() {
+            curl -sS -v -u "$FTP_USERNAME:$FTP_PASSWORD" "$url/" \
+              -Q "DELE $1" -o /dev/null 2>&1 \
+              | grep -E '^< (250|450|550|553) ' | head -1 | tr -d '\r'
+          }
           dirs=()
           while IFS= read -r d; do dirs+=("$d"); done < <(cd out && find . -type d -printf '%P\n')
           echo "scanning ${#dirs[@]} directories"
@@ -60,8 +68,7 @@ jobs:
               found=$((found + 1))
               rel="$name"
               [ -n "$d" ] && rel="$d/$name"
-              reply=$(curl -sS -v -u "$FTP_USERNAME:$FTP_PASSWORD" "$url/" \
-                -Q "DELE $rel" -o /dev/null 2>&1 | grep -E '^< ' | tail -2 | tr '\n' ' ')
+              reply=$(dele "$rel")
               echo "leftover: $rel -> $reply"
               case "$reply" in
                 *250*) removed=$((removed + 1)); continue ;;
@@ -69,8 +76,7 @@ jobs:
               # The staging name ends with a dot; retry without it just in case.
               alt="${rel%.}"
               if [ "$alt" != "$rel" ]; then
-                reply2=$(curl -sS -v -u "$FTP_USERNAME:$FTP_PASSWORD" "$url/" \
-                  -Q "DELE $alt" -o /dev/null 2>&1 | grep -E '^< ' | tail -2 | tr '\n' ' ')
+                reply2=$(dele "$alt")
                 echo "  retry without trailing dot: $alt -> $reply2"
                 case "$reply2" in
                   *250*) removed=$((removed + 1)) ;;
@@ -80,8 +86,12 @@ jobs:
           done
           echo "leftovers found: $found, deleted: $removed"
 
+      # v4.4.0 skips a remote folder that is already gone instead of aborting;
+      # v4.3.5 died on the pruning pass with
+      #   FTPError: 550 /_next/static/<old-hash>: No such file or directory
+      # whenever the sync state no longer matched what was really on the server.
       - name: Deploy to Hostinger via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
