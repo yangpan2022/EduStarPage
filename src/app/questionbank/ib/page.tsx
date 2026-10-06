@@ -5,6 +5,7 @@ import { FaLock, FaSyncAlt, FaWifi } from "react-icons/fa";
 import LanProbeRedirect from "@/components/LanProbeRedirect";
 import { PageBanner, SectionHeading } from "@/components/sections";
 import { T } from "@/components/T";
+import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "IB Questionbank (Campus Network Only)",
@@ -30,11 +31,12 @@ const steps: {
   },
   {
     icon: <FaSyncAlt aria-hidden />,
-    titleEn: "Reload this page",
-    titleZh: "刷新本页面",
+    titleEn: "Open it from the campus network",
+    titleZh: "在校园内网打开",
     bodyEn:
-      "This page checks your network on every load and forwards you to the question bank automatically.",
-    bodyZh: "本页面每次加载都会检测网络环境，并自动跳转到题库。",
+      "On campus Wi-Fi the button above opens the question bank every time. This page also forwards you automatically whenever the browser allows the check.",
+    bodyZh:
+      "在校园 Wi-Fi 下，点上方按钮即可进入题库；当浏览器允许检测时，本页面也会自动跳转。",
   },
   {
     icon: <FaLock aria-hidden />,
@@ -56,11 +58,17 @@ export default function IbQuestionbankPage() {
         title={<T en="Campus Network Only" zh="仅限校园内网访问" />}
         intro={
           <T
-            en="The IB question bank runs on a private internal site (learn.edustarcorp.com) that is not published to the public internet. Connect to the EduStar campus network, then open it from the navigation menu."
-            zh="IB 题库运行在不对公网开放的内部站点（learn.edustarcorp.com）上。请先连接 EduStar 校园内网，再从导航栏进入。"
+            en="The IB question bank runs on a private internal site (learn.edustarcorp.com) that is not published to the public internet. Connect to the EduStar campus network, then use the button below — this page also forwards you automatically when it can."
+            zh="IB 题库运行在不对公网开放的内部站点（learn.edustarcorp.com）上。请先连接 EduStar 校园内网，再点下方按钮进入；检测得到时本页面也会自动跳转。"
           />
         }
       >
+        <a
+          href={site.learnUrl}
+          className="btn-shine inline-flex items-center gap-3 whitespace-nowrap rounded-pill bg-gradient-to-br from-accent to-accent-bright px-6 py-3 text-base font-bold text-white shadow-[0_8px_24px_rgba(249,167,30,0.4)] transition-transform hover:-translate-y-0.5"
+        >
+          <T en="Enter Questionbank" zh="进入题库" />
+        </a>
         <Link
           href="/contact"
           className="whitespace-nowrap rounded-pill border-2 border-white/70 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/10"
@@ -105,8 +113,8 @@ export default function IbQuestionbankPage() {
         <div className="rounded-[20px] bg-mist p-8 sm:p-10">
           <p className="text-sm leading-relaxed text-navy-2/85">
             <T
-              en="Internal address: https://learn.edustarcorp.com — reachable only from the EduStar campus network. The navigation menu routes here first, then forwards you on automatically as soon as the campus network is detected."
-              zh="内部地址：https://learn.edustarcorp.com —— 仅在 EduStar 校园内网可访问。导航栏会先进入本页面，检测到校园内网后立即自动跳转。"
+              en="Internal address: https://learn.edustarcorp.com — reachable only from the EduStar campus network. If the automatic check is blocked by your browser (Chrome may ask for permission to reach the local network), the button above still works."
+              zh="内部地址：https://learn.edustarcorp.com —— 仅在 EduStar 校园内网可访问。若浏览器拦截了自动检测（Chrome 可能询问是否允许访问本地网络），点上方按钮照样可以进入。"
             />
           </p>
         </div>

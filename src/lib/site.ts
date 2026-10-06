@@ -21,7 +21,10 @@ export const site = {
   // network only (no public A record), so it is unreachable from the internet.
   // See docs/learn-edustarcorp-lan-prompt.md for the interface contract.
   learnUrl: "https://learn.edustarcorp.com/",
-  learnProbeUrl: "https://learn.edustarcorp.com/_lan_probe",
+  // A 1x1 transparent PNG served by the static platform. An <img> load needs no
+  // CORS response headers, and an HTML hijack page cannot be decoded as an
+  // image — so a successful load is a reliable "on the campus network" signal.
+  learnProbeUrl: "https://learn.edustarcorp.com/_lan_probe.png",
   learnProbeTimeoutMs: 2000,
 };
 

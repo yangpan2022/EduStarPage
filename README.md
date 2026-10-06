@@ -15,6 +15,8 @@ A Web rebuild of the EduStar Academic Centre website (originally WordPress + Ast
   - That page probes the internal learning platform and forwards campus-network visitors
     automatically; everyone else gets a bilingual "Campus Network Only" notice.
     See [Campus network question bank](#campus-network-question-bank).
+  - The page keeps a manual **Enter Questionbank** button as the guaranteed way in, because
+    Chrome's local-network permission can block the automatic probe.
   - Off-site navigation links open in a new tab (`externalLinkProps` in `Header.tsx`).
 - **v1.0.0**
   - Deployed to Hostinger shared hosting at `edustarcorp.com` via GitHub Actions
@@ -128,25 +130,27 @@ The public site is the entry point:
 1. The header link **Resources → Questionbank → IB Questionbank** points at the on-site
    route `/questionbank/ib` — deliberately *not* at the internal host, so off-campus
    visitors never land on a bare browser error page.
-2. That route renders a bilingual "Campus Network Only" notice and mounts
-   `src/components/LanProbeRedirect.tsx`, which probes the platform (2 s timeout,
-   `credentials: "omit"`, `cache: "no-store"`).
-3. Probe succeeds → the visitor is forwarded to the platform. Probe fails → the notice
-   stays on screen.
+2. That route renders a bilingual "Campus Network Only" notice plus a manual
+   **Enter Questionbank** button, and mounts `src/components/LanProbeRedirect.tsx`, which
+   probes the platform by loading a 1×1 PNG (2 s timeout, cache-busted).
+3. Probe succeeds → the visitor is forwarded automatically. Probe fails → the notice stays
+   on screen and the manual button still works (a top-level navigation is not gated by the
+   browser's local-network restrictions).
 
 Both URLs live in `src/lib/site.ts`:
 
 | Key | Value | Purpose |
 | --- | ----- | ------- |
 | `learnUrl` | `https://learn.edustarcorp.com/` | the internal platform itself |
-| `learnProbeUrl` | `https://learn.edustarcorp.com/_lan_probe` | reachability probe endpoint |
+| `learnProbeUrl` | `https://learn.edustarcorp.com/_lan_probe.png` | static 1×1 PNG reachability probe |
 | `learnProbeTimeoutMs` | `2000` | probe timeout |
 
-The internal server must serve **HTTPS with a browser-trusted certificate** (an HTTPS page
-cannot probe a plain `http://` host) and answer the probe with
-`Access-Control-Allow-Origin: https://edustarcorp.com`,
-`Access-Control-Allow-Private-Network: true` and `Cache-Control: no-store`. The full
-requirements handed to the learning-platform owner are in
+The internal server must serve **HTTPS with a browser-trusted certificate** — an HTTPS page
+cannot probe a plain `http://` host. The probe is a plain `<img>` load, so it needs **no CORS
+headers and no backend**: a purely static host is enough. Chrome's Local Network Access
+rules may prompt the visitor before that image request, which is exactly why the page keeps a
+manual button as the guaranteed way in. Full requirements handed to the learning-platform
+owner are in
 [`docs/learn-edustarcorp-lan-prompt.md`](docs/learn-edustarcorp-lan-prompt.md).
 
 `/questionbank/ib` carries `robots: { index: false, follow: false }` because it is a
