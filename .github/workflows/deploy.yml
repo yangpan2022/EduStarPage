@@ -30,6 +30,11 @@ jobs:
       # every later run then dies with
       #   FTPError: 550 ... Temporary hidden file ... already exists
       # Sweep every directory for such leftovers before syncing. Never fail here.
+      #
+      # Paths must be RELATIVE to the login directory (public_html): this FTP
+      # account answers 550 to "/_not-found" even though that directory exists,
+      # so a leading slash silently turned every earlier DELE into a no-op.
+      # curl -v is required, otherwise the server reply never reaches the log.
       - name: Clean up leftover FTP staging files
         continue-on-error: true
         env:
@@ -45,6 +50,7 @@ jobs:
           echo "scanning ${#dirs[@]} directories"
 
           found=0
+          removed=0
           for d in "${dirs[@]}"; do
             path="$url/"
             [ -n "$d" ] && path="$url/$d/"
@@ -52,12 +58,27 @@ jobs:
             while IFS= read -r name; do
               [ -z "$name" ] && continue
               found=$((found + 1))
-              echo "removing leftover: /$d/$name"
-              curl -sS -u "$FTP_USERNAME:$FTP_PASSWORD" "$url/" \
-                -Q "DELE /$d/$name" -o /dev/null 2>&1 | grep -E '^< ' | head -2
+              rel="$name"
+              [ -n "$d" ] && rel="$d/$name"
+              reply=$(curl -sS -v -u "$FTP_USERNAME:$FTP_PASSWORD" "$url/" \
+                -Q "DELE $rel" -o /dev/null 2>&1 | grep -E '^< ' | tail -2 | tr '\n' ' ')
+              echo "leftover: $rel -> $reply"
+              case "$reply" in
+                *250*) removed=$((removed + 1)); continue ;;
+              esac
+              # The staging name ends with a dot; retry without it just in case.
+              alt="${rel%.}"
+              if [ "$alt" != "$rel" ]; then
+                reply2=$(curl -sS -v -u "$FTP_USERNAME:$FTP_PASSWORD" "$url/" \
+                  -Q "DELE $alt" -o /dev/null 2>&1 | grep -E '^< ' | tail -2 | tr '\n' ' ')
+                echo "  retry without trailing dot: $alt -> $reply2"
+                case "$reply2" in
+                  *250*) removed=$((removed + 1)) ;;
+                esac
+              fi
             done < <(printf '%s\n' "$listing" | awk '$NF ~ /^\.in\./ { print $NF }')
           done
-          echo "leftovers removed: $found"
+          echo "leftovers found: $found, deleted: $removed"
 
       - name: Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
