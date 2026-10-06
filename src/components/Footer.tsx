@@ -91,15 +91,10 @@ export default function Footer() {
 
       <div className="bg-navy py-4 text-center">
         <p className="text-sm text-accent-bright">
-          <T en="Copyright © 2026 | Powered by " zh="版权所有 © 2026 | 技术支持 " />
-          <a
-            href="https://wpastra.com"
-            target="_blank"
-            rel="noreferrer"
-            className="underline-offset-2 hover:underline"
-          >
-            Astra WordPress Theme
-          </a>
+          <T
+            en="Copyright © 2026 | Powered by Edustar Team"
+            zh="版权所有 © 2026 | 技术支持 Edustar Team"
+          />
         </p>
       </div>
     </footer>
