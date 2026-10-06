@@ -23,6 +23,12 @@ function isActive(pathname: string, item: NavItem): boolean {
   return false;
 }
 
+/** Nav destinations can point off-site (the campus-LAN learning platform),
+ * which opens in its own tab so the public site stays where it is. */
+function externalLinkProps(href: string): { target?: "_blank"; rel?: string } {
+  return href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {};
+}
+
 export default function Header() {
   const pathname = usePathname();
   const { lang, t } = useLang();
@@ -98,6 +104,7 @@ export default function Header() {
                   <li key={item.label} className="group relative">
                     <Link
                       href={item.href}
+                      {...externalLinkProps(item.href)}
                       className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-2.5 text-[13px] font-medium transition-colors lg:px-2.5 lg:text-[14px] xl:px-3 xl:text-[15px] ${
                         active
                           ? "text-accent"
@@ -116,6 +123,7 @@ export default function Header() {
                           <li key={child.label} className="group/sub relative">
                             <Link
                               href={child.href}
+                              {...externalLinkProps(child.href)}
                               className={`flex items-center justify-between gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-mist hover:text-accent ${
                                 isActive(pathname, child) ? "text-accent" : "text-navy"
                               }`}
@@ -132,6 +140,7 @@ export default function Header() {
                                   <li key={leaf.label}>
                                     <Link
                                       href={leaf.href}
+                                      {...externalLinkProps(leaf.href)}
                                       className={`block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-mist hover:text-accent ${
                                         isActive(pathname, leaf) ? "text-accent" : "text-navy"
                                       }`}
@@ -196,6 +205,7 @@ export default function Header() {
                   <div className="flex items-center justify-between">
                     <Link
                       href={item.href}
+                      {...externalLinkProps(item.href)}
                       onClick={() => setMobileOpen(false)}
                       className={`flex-1 py-3 text-base font-semibold ${
                         isActive(pathname, item) ? "text-accent" : "text-navy"
@@ -224,6 +234,7 @@ export default function Header() {
                         <li key={child.label}>
                           <Link
                             href={child.href}
+                            {...externalLinkProps(child.href)}
                             onClick={() => setMobileOpen(false)}
                             className="block py-2.5 text-sm text-navy-2"
                           >
@@ -235,6 +246,7 @@ export default function Header() {
                                 <li key={leaf.label}>
                                   <Link
                                     href={leaf.href}
+                                    {...externalLinkProps(leaf.href)}
                                     onClick={() => setMobileOpen(false)}
                                     className="block py-2 text-sm text-tertiary"
                                   >

@@ -5,9 +5,17 @@ A Web rebuild of the EduStar Academic Centre website (originally WordPress + Ast
 ## Version
 
 **v1.0.0** — production release (2026-09-29)
+**v1.0.1** — in progress: campus-LAN question bank entry (not yet deployed)
 
 ### Changelog
 
+- **v1.0.1** — campus-LAN question bank entry (unreleased)
+  - Header nav **Resources → Questionbank → IB Questionbank** now routes through the
+    on-site `/questionbank/ib` page instead of a "Coming Soon" placeholder.
+  - That page probes the internal learning platform and forwards campus-network visitors
+    automatically; everyone else gets a bilingual "Campus Network Only" notice.
+    See [Campus network question bank](#campus-network-question-bank).
+  - Off-site navigation links open in a new tab (`externalLinkProps` in `Header.tsx`).
 - **v1.0.0**
   - Deployed to Hostinger shared hosting at `edustarcorp.com` via GitHub Actions
     (build + FTP deploy to `public_html`).
@@ -41,9 +49,11 @@ A Web rebuild of the EduStar Academic Centre website (originally WordPress + Ast
   with EN / 中文 support and the original scoring logic.
 - ✅ Contact page with embedded map and a Formspree-ready free-trial form.
 - ✅ Assets (logo, hero/about/course images, WeChat QR, favicon) downloaded locally to `public/images`.
-- ⏳ Placeholder pages ("Coming Soon"): Questionbank (parent + Primary/Secondary/IB),
+- ⏳ Placeholder pages ("Coming Soon"): Questionbank (parent + Primary/Secondary),
   Dashboard, Student Registration, Instructor Registration — the source site has no
   published content for these either.
+- 🔒 `/questionbank/ib` is the campus-network entry point to the internal IB question bank
+  (see [Campus network question bank](#campus-network-question-bank)).
 - ✅ The free-trial form posts to Formspree (endpoint injected at build time), emailing
   booking requests to the centre.
 - 🖼 Team photos and testimonial avatars currently reuse the source site's placeholder images.
@@ -83,6 +93,7 @@ src/
   components/              # Header, Footer, Reveal, Counter, forms, quiz, table...
   lib/site.ts              # nav + contact/social data
 public/images/             # assets downloaded from the original site
+docs/                      # internal notes (campus-LAN integration prompt)
 ```
 
 ## Pages
@@ -90,6 +101,9 @@ public/images/             # assets downloaded from the original site
 Marketing pages are fully built. The `questionbank`, `dashboard`, `student-registration`
 and `instructor-registration` pages are intentional **placeholders** ("Coming Soon") —
 the original WordPress site has no published content for those routes either.
+
+`/questionbank/ib` is the exception: it is the public entry point to the internal IB
+question bank (see [Campus network question bank](#campus-network-question-bank)).
 
 ## Forms
 
@@ -102,6 +116,45 @@ NEXT_PUBLIC_FORMSPREE_ENDPOINT="https://formspree.io/f/your-id"
 If the variable is not set, the form falls back to opening the visitor's mail client.
 In production this value is stored as the GitHub secret `FORMSPREE_ENDPOINT` and injected
 into the build by the deploy workflow.
+
+## Campus network question bank
+
+The IB question bank is **not** part of this public site. It runs on a separate internal
+server whose hostname resolves only inside the EduStar campus network (no public DNS
+record), so it is unreachable from the internet by design.
+
+The public site is the entry point:
+
+1. The header link **Resources → Questionbank → IB Questionbank** points at the on-site
+   route `/questionbank/ib` — deliberately *not* at the internal host, so off-campus
+   visitors never land on a bare browser error page.
+2. That route renders a bilingual "Campus Network Only" notice and mounts
+   `src/components/LanProbeRedirect.tsx`, which probes the platform (2 s timeout,
+   `credentials: "omit"`, `cache: "no-store"`).
+3. Probe succeeds → the visitor is forwarded to the platform. Probe fails → the notice
+   stays on screen.
+
+Both URLs live in `src/lib/site.ts`:
+
+| Key | Value | Purpose |
+| --- | ----- | ------- |
+| `learnUrl` | `https://learn.edustarcorp.com/` | the internal platform itself |
+| `learnProbeUrl` | `https://learn.edustarcorp.com/_lan_probe` | reachability probe endpoint |
+| `learnProbeTimeoutMs` | `2000` | probe timeout |
+
+The internal server must serve **HTTPS with a browser-trusted certificate** (an HTTPS page
+cannot probe a plain `http://` host) and answer the probe with
+`Access-Control-Allow-Origin: https://edustarcorp.com`,
+`Access-Control-Allow-Private-Network: true` and `Cache-Control: no-store`. The full
+requirements handed to the learning-platform owner are in
+[`docs/learn-edustarcorp-lan-prompt.md`](docs/learn-edustarcorp-lan-prompt.md).
+
+`/questionbank/ib` carries `robots: { index: false, follow: false }` because it is a
+utility page rather than content.
+
+Testing without the campus network: open `/questionbank/ib` — the probe times out and the
+notice renders. To exercise the forwarding path, point `learn.edustarcorp.com` at a local
+server (hosts file) that answers `200` on `/_lan_probe`.
 
 ## Deploy to Hostinger (GitHub Actions)
 

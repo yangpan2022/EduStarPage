@@ -17,6 +17,12 @@ export const site = {
   addressLines: ["190 Middle Road, #15-06 Fortune Centre", "Singapore 188979"],
   mapEmbed:
     "https://maps.google.com/maps?q=190%20Middle%20Road%2C%20%2315-06%20Fortune%20Centre%20Singapore%20188979&t=m&z=16&output=embed&iwloc=near",
+  // Campus-LAN-only learning platform. The hostname resolves on the campus
+  // network only (no public A record), so it is unreachable from the internet.
+  // See docs/learn-edustarcorp-lan-prompt.md for the interface contract.
+  learnUrl: "https://learn.edustarcorp.com/",
+  learnProbeUrl: "https://learn.edustarcorp.com/_lan_probe",
+  learnProbeTimeoutMs: 2000,
 };
 
 export type NavItem = {
@@ -63,6 +69,8 @@ export const nav: NavItem[] = [
         children: [
           { label: "Primary School", labelZh: "小学", href: "/questionbank/primary-school" },
           { label: "Secondary School", labelZh: "中学", href: "/questionbank/secondary-school" },
+          // Routed through /questionbank/ib so off-campus visitors get a friendly
+          // notice and on-campus visitors are forwarded on automatically.
           { label: "IB Questionbank", labelZh: "IB 题库", href: "/questionbank/ib" },
         ],
       },
