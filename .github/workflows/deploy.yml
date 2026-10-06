@@ -38,22 +38,30 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           set +e
-          commands=()
-          while IFS= read -r f; do
-            dir=$(dirname "$f")
-            [ "$dir" = "." ] && dir=""
-            commands+=(-Q "*DELE /${dir}/.in.$(basename "$f")")
-          done < <(cd out && find . -type f -printf '%P\n')
-          echo "staging paths checked: $(( ${#commands[@]} / 2 ))"
+          URL="ftp://$FTP_HOST:$FTP_PORT"
+          TARGET="_not-found/.in.__next._index.txt"
+          probe() {
+            echo "----- $1"
+            shift
+            curl -sS -v -u "$FTP_USERNAME:$FTP_PASSWORD" "$URL/" "$@" -o /dev/null 2>&1 \
+              | grep -E '^[<>] (PWD|DELE|CWD|550|250|257|530)' | head -12
+          }
 
-          curl -sS -v -u "$FTP_USERNAME:$FTP_PASSWORD" \
-            "ftp://$FTP_HOST:$FTP_PORT/" "${commands[@]}" \
-            -o /dev/null > "$RUNNER_TEMP/ftp-cleanup.log" 2>&1
+          echo "===== login directory"
+          probe "PWD" -Q "PWD"
+          echo "===== listing /"
+          curl -sS -u "$FTP_USERNAME:$FTP_PASSWORD" "$URL/" 2>&1 | head -20
+          echo "===== listing /_not-found/"
+          curl -sS -u "$FTP_USERNAME:$FTP_PASSWORD" "$URL/_not-found/" 2>&1 | head -20
 
-          echo "DELE sent     : $(grep -c '^> DELE' "$RUNNER_TEMP/ftp-cleanup.log")"
-          echo "DELE succeeded: $(grep -c '^< 250' "$RUNNER_TEMP/ftp-cleanup.log")"
-          echo "unexpected replies:"
-          grep -E '^< [45][0-9][0-9] ' "$RUNNER_TEMP/ftp-cleanup.log" | grep -v '^< 550 ' | head -5
+          echo "===== delete attempts"
+          probe "absolute path"     -Q "*DELE /$TARGET"
+          probe "relative path"     -Q "*DELE $TARGET"
+          probe "cwd + basename"    -Q "CWD /_not-found" -Q "*DELE .in.__next._index.txt" -Q "CWD /"
+          probe "full server path"  -Q "*DELE /domains/edustarcorp.com/public_html/$TARGET"
+
+          echo "===== leftovers still present in /_not-found/"
+          curl -sS -u "$FTP_USERNAME:$FTP_PASSWORD" "$URL/_not-found/" 2>&1 | grep -F '.in.' || echo "(none)"
 
       - name: Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
