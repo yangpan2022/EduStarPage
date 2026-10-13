@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { FaLock, FaSyncAlt, FaWifi } from "react-icons/fa";
-import LanProbeRedirect from "@/components/LanProbeRedirect";
 import { PageBanner, SectionHeading } from "@/components/sections";
 import { T } from "@/components/T";
 import { site } from "@/lib/site";
@@ -34,9 +33,9 @@ const steps: {
     titleEn: "Open it from the campus network",
     titleZh: "在校园内网打开",
     bodyEn:
-      "On campus Wi-Fi the button above opens the question bank every time. This page also forwards you automatically whenever the browser allows the check.",
+      "After joining the EduStar campus network, click Enter Questionbank above. No DNS changes are needed on your device.",
     bodyZh:
-      "在校园 Wi-Fi 下，点上方按钮即可进入题库；当浏览器允许检测时，本页面也会自动跳转。",
+      "连接 EduStar 校园网络后，点击上方“进入题库”按钮。无需修改设备的 DNS 设置。",
   },
   {
     icon: <FaLock aria-hidden />,
@@ -51,15 +50,13 @@ const steps: {
 export default function IbQuestionbankPage() {
   return (
     <div>
-      <LanProbeRedirect />
-
       <PageBanner
         kicker={<T en="IB Questionbank" zh="IB 题库" />}
         title={<T en="Campus Network Only" zh="仅限校园内网访问" />}
         intro={
           <T
-            en="The IB question bank runs on a private internal site (learn.edustarcorp.com) that is not published to the public internet. Connect to the EduStar campus network, then use the button below — this page also forwards you automatically when it can."
-            zh="IB 题库运行在不对公网开放的内部站点（learn.edustarcorp.com）上。请先连接 EduStar 校园内网，再点下方按钮进入；检测得到时本页面也会自动跳转。"
+            en="The IB question bank is available on the EduStar campus network. Connect to the campus Wi-Fi, then click Enter Questionbank below."
+            zh="IB 题库仅在 EduStar 校园网络内开放。请先连接校园 Wi-Fi，再点击下方“进入题库”按钮。"
           />
         }
       >
@@ -113,8 +110,8 @@ export default function IbQuestionbankPage() {
         <div className="rounded-[20px] bg-mist p-8 sm:p-10">
           <p className="text-sm leading-relaxed text-navy-2/85">
             <T
-              en="Internal address: https://learn.edustarcorp.com — reachable only from the EduStar campus network. If the automatic check is blocked by your browser (Chrome may ask for permission to reach the local network), the button above still works."
-              zh="内部地址：https://learn.edustarcorp.com —— 仅在 EduStar 校园内网可访问。若浏览器拦截了自动检测（Chrome 可能询问是否允许访问本地网络），点上方按钮照样可以进入。"
+              en={`Internal address: ${site.learnUrl} — available only on the EduStar campus network. Use the Enter Questionbank button above.`}
+              zh={`内部地址：${site.learnUrl} —— 仅限 EduStar 校园网络访问。请点击上方“进入题库”按钮。`}
             />
           </p>
         </div>
