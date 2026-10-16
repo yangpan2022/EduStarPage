@@ -25,11 +25,12 @@ const resources = [
   {
     titleEn: "Question Banks",
     titleZh: "题库",
-    descriptionEn: "Curated question banks for primary, secondary, and IB students — coming soon.",
-    descriptionZh: "面向小学、中学与 IB 学生的精选题库 —— 即将上线。",
+    descriptionEn:
+      "Choose from primary, secondary, and IB question banks. The campus IB question bank is available now.",
+    descriptionZh: "选择小学、中学或 IB 题库；校园内网 IB 题库现已开放。",
     href: "/questionbank",
     Icon: FaBook,
-    available: false,
+    available: true,
   },
   {
     titleEn: "Competition",
