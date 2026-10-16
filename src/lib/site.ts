@@ -17,9 +17,15 @@ export const site = {
   addressLines: ["190 Middle Road, #15-06 Fortune Centre", "Singapore 188979"],
   mapEmbed:
     "https://maps.google.com/maps?q=190%20Middle%20Road%2C%20%2315-06%20Fortune%20Centre%20Singapore%20188979&t=m&z=16&output=embed&iwloc=near",
-  // Campus-only static question bank. Use the verified LAN address so
-  // visitors do not depend on a device-specific DNS configuration.
-  learnUrl: "http://192.168.0.79:8080/",
+  // Campus-LAN-only learning platform. The hostname resolves on the campus
+  // network only (no public A record), so it is unreachable from the internet.
+  // See docs/learn-edustarcorp-lan-prompt.md for the interface contract.
+  learnUrl: "https://learn.edustarcorp.com/",
+  // A 1x1 transparent PNG served by the static platform. An <img> load needs no
+  // CORS response headers, and an HTML hijack page cannot be decoded as an
+  // image — so a successful load is a reliable "on the campus network" signal.
+  learnProbeUrl: "https://learn.edustarcorp.com/_lan_probe.png",
+  learnProbeTimeoutMs: 2000,
 };
 
 export type NavItem = {
@@ -67,7 +73,7 @@ export const nav: NavItem[] = [
           { label: "Primary School", labelZh: "小学", href: "/questionbank/primary-school" },
           { label: "Secondary School", labelZh: "中学", href: "/questionbank/secondary-school" },
           // Routed through /questionbank/ib so off-campus visitors get a friendly
-          // notice and on-campus visitors can enter with the direct link.
+          // notice and on-campus visitors are forwarded on automatically.
           { label: "IB Questionbank", labelZh: "IB 题库", href: "/questionbank/ib" },
         ],
       },
